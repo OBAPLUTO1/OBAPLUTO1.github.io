@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>ORBIT | Nigerian Market Intelligence</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --bg-2: #0a1728;
+      --panel: #0d1b2d;
+      --panel-2: #101f33;
+      --panel-3: #14253a;
+      --line: rgba(148, 171, 202, .14);
+      --line-strong: rgba(148, 171, 202, .24);
+      --text: #edf4ff;
+      --muted: #93a5bd;
+      --soft: #bdcbe0;
+      --green: #70e0b2;
+      --green-dim: rgba(91, 209, 161, .11);
+      --amber: #f2c27c;
+      --amber-dim: rgba(242, 194, 124, .12);
+      --blue: #8bb8ff;
+      --blue-dim: rgba(115, 160, 230, .12);
+      --red: #f39898;
+      --radius: 14px;
+      --shadow: 0 18px 46px rgba(0, 0, 0, .18);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 79% -20%, rgba(38, 82, 131, .22), transparent 42%),
+        linear-gradient(180deg, #081321, var(--bg) 44%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    button, a { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; text-decoration: none; }
+    button:focus-visible, a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+    .topbar {
+      height: 68px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      background: rgba(7, 17, 31, .88);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(16px);
+    }
+    .brand { display:flex; align-items:center; gap:11px; min-width:220px; }
+    .brand-mark { width:29px; height:29px; position:relative; border:1.5px solid #8fc7ff; border-radius:50%; transform:rotate(-28deg); }
+    .brand-mark::before { content:""; position:absolute; inset:5px -4px; border:1px solid rgba(143,199,255,.58); border-radius:50%; }
+    .brand-mark::after { content:""; position:absolute; width:5px; height:5px; border-radius:50%; background:var(--green); right:0; top:3px; box-shadow:0 0 12px rgba(112,224,178,.8); }
+    .brand-word { font-size:15px; font-weight:750; letter-spacing:.18em; }
+    .brand-sub { color:var(--muted); font-size:10px; letter-spacing:.14em; margin-top:-2px; text-transform:uppercase; }
+    .top-context { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:12px; }
+    .country-chip, .mode-chip, .source-chip, .ai-chip, .sim-chip {
+      display:inline-flex; align-items:center; gap:7px; border-radius:999px; white-space:nowrap;
+      border:1px solid var(--line); padding:6px 10px; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    }
+    .country-chip { color:#d9e8ff; background:rgba(97,145,203,.08); }
+    .country-dot { width:7px; height:7px; border-radius:50%; background:var(--green); }
+    .mode-chip { color:var(--amber); border-color:rgba(242,194,124,.27); background:var(--amber-dim); }
+    .top-actions { display:flex; align-items:center; gap:9px; }
+    .asof { color:var(--muted); font-size:11px; margin-right:5px; }
+    .btn {
+      border:1px solid var(--line-strong); background:rgba(255,255,255,.025); color:var(--text);
+      border-radius:9px; padding:9px 13px; cursor:pointer; transition:background .18s,border-color .18s,transform .18s;
+    }
+    .btn:hover { background:rgba(139,184,255,.09); border-color:rgba(139,184,255,.42); transform:translateY(-1px); }
+    .btn.primary { background:#dceaff; color:#10213a; border-color:#dceaff; font-weight:700; }
+    .btn.primary:hover { background:#fff; border-color:#fff; }
+    .btn.quiet { border-color:transparent; background:transparent; color:var(--muted); }
+    .btn.small { font-size:11px; padding:7px 10px; }
+    .layout { display:grid; grid-template-columns:226px minmax(0,1fr); min-height:calc(100vh - 68px); }
+    .sidebar {
+      border-right:1px solid var(--line); background:rgba(8,19,33,.7); padding:22px 14px 18px;
+      display:flex; flex-direction:column; gap:22px;
+    }
+    .side-label { color:#657993; font-size:9px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; padding:0 11px; }
+    .nav-group { display:grid; gap:5px; }
+    .nav-item {
+      width:100%; border:1px solid transparent; background:transparent; color:#9aacc4;
+      display:flex; align-items:center; gap:11px; text-align:left; border-radius:9px; padding:11px 10px; cursor:pointer;
+      font-size:12px; transition:.18s;
+    }
+    .nav-item:hover { background:rgba(255,255,255,.035); color:#e3edfb; }
+    .nav-item.active { color:#edf4ff; background:linear-gradient(90deg,rgba(91,143,211,.18),rgba(91,143,211,.055)); border-color:rgba(126,170,226,.15); }
+    .nav-icon { width:18px; text-align:center; color:#8094ae; font-size:14px; }
+    .nav-item.active .nav-icon { color:var(--blue); }
+    .nav-count { margin-left:auto; color:#7f91a9; font-size:10px; }
+    .side-bottom { margin-top:auto; }
+    .side-note { border-top:1px solid var(--line); padding:17px 10px 0; color:#7588a1; font-size:10px; }
+    .side-note strong { color:#b4c3d8; font-weight:650; display:block; margin-bottom:4px; }
+    main { min-width:0; padding:29px clamp(20px,3.1vw,48px) 46px; max-width:1600px; width:100%; margin:0 auto; }
+    .page-head { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:22px; }
+    .eyebrow { color:var(--blue); text-transform:uppercase; letter-spacing:.14em; font-size:9px; font-weight:800; margin-bottom:8px; }
+    h1 { font-size:clamp(23px,2vw,30px); letter-spacing:-.035em; line-height:1.16; margin:0; font-weight:650; }
+    .page-sub { color:var(--muted); margin:8px 0 0; font-size:12px; }
+    .head-right { display:flex; align-items:center; gap:10px; padding-top:12px; }
+    .label-dot { display:inline-flex; align-items:center; gap:7px; font-size:10px; color:var(--muted); }
+    .label-dot::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--green); }
+    .view { display:none; animation:show .24s ease-out; }
+    .view.active { display:block; }
+    @keyframes show { from { opacity:.45; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+    .metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:14px; }
+    .metric {
+      padding:15px 16px 14px; border:1px solid var(--line); border-radius:12px;
+      background:linear-gradient(155deg,rgba(18,34,54,.95),rgba(11,25,41,.93)); box-shadow:0 10px 28px rgba(0,0,0,.1);
+    }
+    .metric-top { display:flex; justify-content:space-between; align-items:center; gap:10px; color:var(--muted); font-size:10px; }
+    .metric-value { font-size:25px; letter-spacing:-.04em; font-weight:650; line-height:1.1; margin:13px 0 8px; font-variant-numeric:tabular-nums; }
+    .metric-foot { color:#8295ad; font-size:10px; display:flex; align-items:center; justify-content:space-between; gap:6px; }
+    .source-chip { color:#98e2bf; background:var(--green-dim); border-color:rgba(112,224,178,.2); font-size:8px; padding:4px 7px; }
+    .ai-chip { color:#c5d8ff; background:var(--blue-dim); border-color:rgba(139,184,255,.22); font-size:8px; padding:4px 7px; }
+    .sim-chip { color:var(--amber); background:var(--amber-dim); border-color:rgba(242,194,124,.22); font-size:8px; padding:4px 7px; }
+    .dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .hero {
+      display:grid; grid-template-columns:minmax(0,1.36fr) minmax(270px,.9fr); overflow:hidden;
+      border:1px solid rgba(134,174,224,.2); border-radius:var(--radius);
+      background:radial-gradient(ellipse at 10% -28%,rgba(49,103,158,.25),transparent 48%),linear-gradient(125deg,#10243a,#0b1a2c 68%);
+      box-shadow:var(--shadow); margin-bottom:15px;
+    }
+    .hero-main { padding:23px 25px 22px; }
+    .hero-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .event-ref { color:#8fa6c2; font-size:10px; letter-spacing:.07em; }
+    .hero h2 { margin:0; font-size:clamp(19px,1.7vw,25px); line-height:1.2; letter-spacing:-.03em; font-weight:640; }
+    .hero p { color:#a3b5cb; font-size:12px; max-width:720px; margin:10px 0 0; }
+    .hero strong { color:#eaf3ff; font-weight:650; }
+    .hero-side { padding:22px; border-left:1px solid var(--line); display:flex; flex-direction:column; justify-content:center; }
+    .hero-side-title { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.12em; font-weight:750; }
+    .hero-compare { display:flex; align-items:center; gap:12px; margin:13px 0 11px; }
+    .rate-block small { display:block; color:#8194ac; font-size:9px; text-transform:uppercase; letter-spacing:.12em; }
+    .rate-block strong { display:block; font-size:23px; font-variant-numeric:tabular-nums; font-weight:620; margin-top:2px; }
+    .rate-arrow { color:#70859d; font-size:18px; }
+    .rate-change { color:var(--amber); font-size:11px; font-weight:650; }
+    .hero-caveat { font-size:10px; line-height:1.45; color:#aebdd0; border-left:2px solid var(--amber); padding-left:9px; }
+    .grid-two { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr); gap:14px; margin-bottom:14px; }
+    .panel { border:1px solid var(--line); border-radius:var(--radius); background:linear-gradient(160deg,rgba(14,29,47,.96),rgba(10,23,39,.96)); }
+    .panel-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:17px 18px 0; }
+    .panel-title { font-size:13px; font-weight:650; margin:0; letter-spacing:-.01em; }
+    .panel-sub { color:#8194aa; font-size:10px; margin-top:4px; }
+    .panel-body { padding:15px 18px 18px; }
+    .timeline { position:relative; display:grid; gap:0; }
+    .timeline::before { content:""; position:absolute; left:7px; top:14px; bottom:17px; width:1px; background:linear-gradient(var(--blue),rgba(128,153,185,.12)); }
+    .timeline-event { position:relative; display:grid; grid-template-columns:16px minmax(0,1fr); gap:10px; padding-bottom:15px; }
+    .timeline-event:last-child { padding-bottom:0; }
+    .timeline-mark { z-index:1; width:14px; height:14px; margin-top:3px; border:3px solid #172b43; border-radius:50%; background:#719bce; box-shadow:0 0 0 1px rgba(139,184,255,.38); }
+    .timeline-event.current .timeline-mark { background:var(--green); box-shadow:0 0 0 1px rgba(112,224,178,.52),0 0 16px rgba(112,224,178,.22); }
+    .timeline-date { color:#8295ac; font-size:9px; letter-spacing:.09em; text-transform:uppercase; margin-bottom:3px; }
+    .timeline-title { color:#e3edf9; font-size:11px; font-weight:620; }
+    .timeline-text { color:#94a7be; font-size:10px; margin-top:2px; }
+    .timeline-source { margin-top:5px; font-size:9px; color:#8bb8ff; display:inline-flex; align-items:center; gap:4px; }
+    .interpretation-panel { position:relative; overflow:hidden; }
+    .interpretation-panel::after { content:""; position:absolute; width:170px; height:170px; right:-85px; top:-90px; background:rgba(88,137,208,.1); filter:blur(40px); border-radius:50%; pointer-events:none; }
+    .ai-lead { color:#e4eefc; font-size:12px; line-height:1.62; margin:0 0 12px; }
+    .ai-lead em { color:var(--blue); font-style:normal; }
+    .chain-title { color:#7f93ab; font-size:9px; text-transform:uppercase; letter-spacing:.12em; margin:17px 0 9px; }
+    .chain { display:grid; grid-template-columns:repeat(4,1fr); align-items:stretch; gap:6px; }
+    .chain-step { position:relative; min-height:58px; border:1px solid rgba(132,164,201,.12); border-radius:8px; background:rgba(255,255,255,.022); padding:9px 8px; color:#c7d6e9; font-size:9px; line-height:1.3; }
+    .chain-step:not(:last-child)::after { content:"›"; position:absolute; right:-8px; top:16px; z-index:1; color:#748aa4; background:#0d1b2d; font-size:15px; }
+    .chain-step span { display:block; color:#758ba5; font-size:8px; margin-bottom:4px; text-transform:uppercase; letter-spacing:.08em; }
+    .qual-note { display:flex; align-items:flex-start; gap:7px; color:#8699b0; font-size:9px; margin-top:10px; }
+    .sector-preview { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+    .sector-mini { padding:13px; border-radius:11px; border:1px solid var(--line); background:rgba(13,27,45,.88); min-height:108px; }
+    .sector-mini-top { display:flex; align-items:center; justify-content:space-between; gap:8px; color:#dce8f8; font-size:10px; font-weight:620; }
+    .sensitivity { color:var(--amber); border:1px solid rgba(242,194,124,.2); background:var(--amber-dim); padding:3px 6px; border-radius:999px; font-size:8px; text-transform:uppercase; letter-spacing:.07em; white-space:nowrap; }
+    .sector-mini p { color:#8ea1b8; font-size:9px; line-height:1.45; margin:9px 0 0; }
+    .section-head { display:flex; justify-content:space-between; align-items:end; gap:18px; margin:23px 0 11px; }
+    .section-head h3 { margin:0; font-size:13px; font-weight:650; }
+    .section-head p { color:#7f93aa; font-size:10px; margin:4px 0 0; }
+    .text-link { display:inline-flex; align-items:center; gap:6px; color:#9bc2fa; font-size:10px; white-space:nowrap; }
+    .text-link:hover { color:#d9eaff; }
+    .data-note { color:#71859e; font-size:9px; margin:12px 2px 0; }
+    .legend { display:flex; flex-wrap:wrap; align-items:center; gap:8px; border:1px solid var(--line); border-radius:10px; background:rgba(10,23,39,.65); padding:9px 11px; margin:0 0 14px; }
+    .legend-label { color:#6f839c; font-size:9px; margin-right:2px; text-transform:uppercase; letter-spacing:.1em; }
+    .legend-copy { color:#8194aa; font-size:9px; margin-left:auto; }
+    .event-layout { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(290px,.85fr); gap:14px; }
+    .fact-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .fact { border:1px solid var(--line); background:rgba(255,255,255,.02); border-radius:9px; padding:12px; }
+    .fact-label { color:#7e91a9; font-size:9px; text-transform:uppercase; letter-spacing:.09em; }
+    .fact-value { color:#e7f0fc; font-size:13px; font-weight:630; margin-top:5px; }
+    .fact-context { color:#8b9fb7; font-size:9px; margin-top:4px; }
+    .statement-box { border-left:2px solid var(--green); background:rgba(89,195,150,.055); padding:12px 13px; margin-top:12px; color:#b8c9dc; font-size:10px; }
+    .statement-box strong { color:#d9f3e6; font-weight:650; }
+    .analysis-block { padding:13px 0; border-bottom:1px solid var(--line); }
+    .analysis-block:first-child { padding-top:0; }
+    .analysis-block:last-child { border-bottom:0; padding-bottom:0; }
+    .analysis-heading { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:6px; }
+    .analysis-heading strong { font-size:10px; color:#dce8f7; }
+    .analysis-block p { color:#93a7be; font-size:10px; margin:0; line-height:1.57; }
+    .scenarios { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:4px; }
+    .scenario-btn { text-align:left; border:1px solid var(--line); background:rgba(255,255,255,.02); border-radius:9px; padding:10px; cursor:pointer; min-height:67px; }
+    .scenario-btn:hover { border-color:rgba(139,184,255,.35); background:rgba(139,184,255,.055); }
+    .scenario-btn[aria-pressed="true"] { border-color:rgba(139,184,255,.5); background:rgba(110,157,222,.1); box-shadow:inset 0 0 0 1px rgba(139,184,255,.08); }
+    .scenario-btn strong { display:block; color:#dfeafa; font-size:9px; font-weight:650; line-height:1.3; }
+    .scenario-btn span { display:block; color:#8194aa; font-size:8px; margin-top:5px; }
+    .scenario-output { margin-top:10px; padding:12px; border-radius:9px; border:1px solid rgba(139,184,255,.16); background:rgba(99,145,203,.06); min-height:75px; }
+    .scenario-output strong { display:block; color:#c4dcff; font-size:10px; margin-bottom:4px; }
+    .scenario-output p { color:#91a5bd; font-size:9px; margin:0; line-height:1.5; }
+    .sector-table-wrap { overflow-x:auto; }
+    .sector-table { width:100%; border-collapse:collapse; min-width:680px; }
+    .sector-table th { color:#7488a1; font-size:9px; font-weight:700; text-align:left; text-transform:uppercase; letter-spacing:.1em; padding:11px 12px; border-bottom:1px solid var(--line-strong); }
+    .sector-table td { color:#a8bad0; font-size:10px; padding:13px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+    .sector-table tr:last-child td { border-bottom:0; }
+    .sector-name { color:#e1ebf8; font-size:11px; font-weight:620; white-space:nowrap; }
+    .sector-name small { display:block; color:#778ba3; font-size:8px; font-weight:450; margin-top:3px; white-space:normal; }
+    .tag-sensitivity { display:inline-flex; color:#e6c48e; background:rgba(242,194,124,.1); border:1px solid rgba(242,194,124,.19); border-radius:999px; padding:4px 7px; font-size:8px; white-space:nowrap; }
+    .follow-btn { color:#a5bddb; background:transparent; border:1px solid var(--line-strong); border-radius:7px; padding:6px 8px; font-size:9px; cursor:pointer; white-space:nowrap; }
+    .follow-btn:hover { border-color:rgba(139,184,255,.45); color:#dceaff; }
+    .follow-btn.following { background:var(--green-dim); color:#9de5c2; border-color:rgba(112,224,178,.24); }
+    .watch-summary { display:flex; flex-wrap:wrap; gap:7px; margin-top:13px; }
+    .watch-pill { color:#a9bbd0; border:1px solid var(--line); background:rgba(255,255,255,.02); border-radius:999px; padding:6px 9px; font-size:9px; }
+    .watch-pill b { color:#dce8f7; font-weight:600; }
+    .brief-top { display:flex; justify-content:space-between; gap:18px; align-items:flex-start; }
+    .brief-title { font-family:Georgia, "Times New Roman", serif; font-size:21px; line-height:1.24; letter-spacing:-.02em; max-width:720px; }
+    .brief-meta { color:#7d91aa; font-size:9px; margin-top:8px; letter-spacing:.03em; }
+    .brief-actions { display:flex; gap:8px; flex-shrink:0; }
+    .brief-body { max-width:850px; padding-top:19px; }
+    .brief-body p { color:#acbdd1; font-size:11px; line-height:1.7; margin:0 0 13px; }
+    .brief-body h4 { color:#dce8f7; font-size:10px; margin:18px 0 7px; text-transform:uppercase; letter-spacing:.1em; }
+    .brief-list { padding-left:17px; margin:0; color:#9dafc5; font-size:10px; line-height:1.7; }
+    .brief-list li { padding-left:3px; margin:4px 0; }
+    .brief-callout { border-left:2px solid var(--amber); background:rgba(242,194,124,.055); padding:11px 13px; color:#c9bb9e; font-size:10px; line-height:1.55; margin:17px 0; }
+    .brief-sources { display:flex; flex-wrap:wrap; gap:8px 14px; padding-top:14px; margin-top:15px; border-top:1px solid var(--line); }
+    .brief-sources a { font-size:9px; color:#9bbff0; }
+    .sources-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+    .source-item { border:1px solid var(--line); background:rgba(255,255,255,.02); border-radius:9px; padding:12px; }
+    .source-item a { color:#dceaff; font-size:10px; font-weight:600; }
+    .source-item p { color:#7f93ab; font-size:9px; margin:5px 0 0; }
+    .disclaimer { margin-top:19px; padding:13px 15px; border:1px solid rgba(242,194,124,.18); border-radius:10px; background:rgba(242,194,124,.045); color:#988c78; font-size:9px; line-height:1.55; }
+    .disclaimer strong { color:#d5bd91; font-weight:650; }
+    .data-legend { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .guide-backdrop { display:none; position:fixed; inset:0; z-index:30; background:rgba(1,7,14,.72); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px; }
+    .guide-backdrop.open { display:flex; }
+    .guide-modal { width:min(480px,100%); border:1px solid rgba(147,182,224,.24); border-radius:16px; background:linear-gradient(150deg,#13243a,#0a1728); box-shadow:0 30px 100px rgba(0,0,0,.48); padding:22px; }
+    .guide-top { display:flex; justify-content:space-between; align-items:center; }
+    .guide-kicker { color:var(--blue); text-transform:uppercase; letter-spacing:.13em; font-size:9px; font-weight:750; }
+    .close-guide { border:0; background:transparent; color:#8295ad; cursor:pointer; font-size:20px; line-height:1; padding:4px 7px; }
+    .guide-progress { display:flex; gap:5px; margin:17px 0 18px; }
+    .guide-progress span { height:3px; flex:1; background:rgba(150,174,204,.16); border-radius:3px; }
+    .guide-progress span.on { background:var(--green); }
+    .guide-modal h2 { font-size:18px; letter-spacing:-.025em; margin:0 0 8px; }
+    .guide-modal p { font-size:11px; color:#9aadc4; line-height:1.62; margin:0; min-height:58px; }
+    .guide-footer { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:18px; }
+    .guide-step { color:#72869f; font-size:9px; }
+    .toast { position:fixed; bottom:22px; left:50%; transform:translate(-50%,20px); opacity:0; pointer-events:none; z-index:50; background:#dceaff; color:#10213a; border-radius:9px; padding:10px 14px; font-size:11px; font-weight:650; box-shadow:0 12px 32px rgba(0,0,0,.32); transition:.22s; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    [hidden] { display:none !important; }
+    @media (max-width:1100px) {
+      .layout { grid-template-columns:194px minmax(0,1fr); }
+      .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .sector-preview { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .topbar { padding:0 19px; }
+      .asof { display:none; }
+    }
+    @media (max-width:760px) {
+      .topbar { height:60px; padding:0 15px; }
+      .brand { min-width:0; }
+      .brand-sub, .top-context, .head-right .label-dot { display:none; }
+      .brand-word { font-size:13px; }
+      .top-actions .btn { padding:8px 10px; font-size:10px; }
+      .layout { display:block; min-height:calc(100vh - 60px); }
+      .sidebar { border-right:0; border-bottom:1px solid var(--line); padding:7px 12px; overflow-x:auto; display:block; }
+      .sidebar .side-label, .sidebar .side-bottom { display:none; }
+      .nav-group { display:flex; width:max-content; gap:4px; }
+      .nav-item { width:auto; white-space:nowrap; padding:9px 10px; font-size:10px; }
+      .nav-icon { width:auto; }
+      .nav-count { display:none; }
+      main { padding:21px 15px 34px; }
+      .page-head { margin-bottom:16px; }
+      .page-head h1 { font-size:23px; }
+      .head-right { display:none; }
+      .metrics { gap:8px; }
+      .metric { padding:12px; }
+      .metric-value { font-size:22px; }
+      .hero, .grid-two, .event-layout { grid-template-columns:1fr; }
+      .hero-main { padding:19px; }
+      .hero-side { border-left:0; border-top:1px solid var(--line); padding:16px 19px; }
+      .hero-compare { margin:8px 0; }
+      .panel-head { padding:15px 14px 0; }
+      .panel-body { padding:13px 14px 15px; }
+      .chain { grid-template-columns:repeat(2,1fr); }
+      .chain-step:nth-child(2)::after { display:none; }
+      .sector-preview { gap:8px; }
+      .sector-mini { padding:11px; }
+      .section-head { align-items:start; }
+      .legend-copy { flex-basis:100%; margin-left:0; }
+      .brief-top { display:block; }
+      .brief-actions { margin-top:13px; }
+    }
+    @media (max-width:420px) {
+      .metrics { grid-template-columns:1fr 1fr; }
+      .metric-top { font-size:9px; }
+      .metric-value { font-size:20px; }
+      .metric-foot { font-size:9px; align-items:flex-start; flex-direction:column; }
+      .country-chip { display:none; }
+      .sector-preview { grid-template-columns:1fr 1fr; }
+      .fact-grid { grid-template-columns:1fr; }
+      .scenarios { grid-template-columns:1fr; }
+      .scenario-btn { min-height:0; }
+      .brief-title { font-size:19px; }
+    }
+    @media print {
+      :root { color-scheme:light; }
+      body { background:#fff; color:#1b2939; }
+      .topbar, .sidebar, .top-actions, .brief-actions, .guide-backdrop, .toast, .nav-item, .follow-btn, .btn { display:none !important; }
+      .layout { display:block; min-height:0; }
+      main { padding:0; max-width:none; }
+      .view { display:none !important; }
+      #view-brief { display:block !important; }
+      .panel, .metric, .hero, .sector-mini { background:#fff; color:#1b2939; border-color:#d6dce4; box-shadow:none; break-inside:avoid; }
+      .brief-body p, .brief-list, .brief-callout, .brief-title, .brief-meta, .brief-body h4 { color:#1b2939; }
+      .disclaimer { color:#685c47; border-color:#d9c89f; background:#fffaf0; }
+      .brief-sources a { color:#294c78; }
+    }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a href="#" class="brand" aria-label="ORBIT Market Intelligence home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span><span class="brand-word">ORBIT</span><span class="brand-sub">Market intelligence</span></span>
+    </a>
+    <div class="top-context">
+      <span class="country-chip"><i class="country-dot"></i>Nigeria · NGN</span>
+      <span class="mode-chip">Prototype · Historical data</span>
+    </div>
+    <div class="top-actions">
+      <span class="asof">Data snapshot · 04 Nov 2026</span>
+      <button class="btn primary small" id="startDemo">Start guided demo&nbsp; →</button>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Dashboard navigation">
+      <div>
+        <div class="side-label">Workspace</div>
+        <nav class="nav-group" aria-label="Dashboard sections">
+          <button class="nav-item active" data-view-target="overview" aria-current="page"><span class="nav-icon">◈</span>Market overview</button>
+          <button class="nav-item" data-view-target="event"><span class="nav-icon">◎</span>Event intelligence<span class="nav-count">01</span></button>
+          <button class="nav-item" data-view-target="sectors"><span class="nav-icon">▦</span>Sector impact</button>
+          <button class="nav-item" data-view-target="brief"><span class="nav-icon">▤</span>Investor brief</button>
+        </nav>
+      </div>
+      <div class="side-bottom">
+        <div class="side-label">Demo context</div>
+        <div class="side-note">
+          <strong>One event · four lenses</strong>
+          Policy decision → transmission → watchlist → investor brief
+        </div>
+        <div class="side-note">
+          <strong>Evidence-first</strong>
+          CBN source links are attached to historical figures. Interpretation is marked separately.
+        </div>
+      </div>
+    </aside>
+    <main>
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Strategic partner demo · Wealth Coach Omiete · Nigeria</div>
+          <h1 id="pageTitle">From policy signal to investor context</h1>
+          <p class="page-sub" id="pageSubtitle">CBN MPC #307 · an evidence-led read of the September 2026 policy reset</p>
+        </div>
+        <div class="head-right"><span class="label-dot">Source-backed snapshot</span></div>
+      </div>
+
+      <section class="view active" id="view-overview" aria-label="Market overview">
+        <div class="metrics">
+          <article class="metric">
+            <div class="metric-top"><span>CBN monetary policy rate</span><span class="source-chip"><i class="dot"></i>CBN fact</span></div>
+            <div class="metric-value">23.00%</div>
+            <div class="metric-foot"><span>Reset · 22 Sep 2026</span><a class="text-link" href="https://www.cbn.gov.ng/MonetaryPolicy/Decisions.html" target="_blank" rel="noopener">Source ↗</a></div>
+          </article>
+          <article class="metric">
+            <div class="metric-top"><span>Inflation · year on year</span><span class="source-chip"><i class="dot"></i>CBN fact</span></div>
+            <div class="metric-value">14.63%</div>
+            <div class="metric-foot"><span>September 2026</span><a class="text-link" href="https://www.cbn.gov.ng/rates/MacroIndicators.html" target="_blank" rel="noopener">Source ↗</a></div>
+          </article>
+          <article class="metric">
+            <div class="metric-top"><span>NFEM · USD / NGN</span><span class="source-chip"><i class="dot"></i>CBN fact</span></div>
+            <div class="metric-value">₦1,346.26</div>
+            <div class="metric-foot"><span>30 Oct 2026 · per US$</span><a class="text-link" href="https://www.cbn.gov.ng/IntOps/KeyRates.html" target="_blank" rel="noopener">Source ↗</a></div>
+          </article>
+          <article class="metric">
+            <div class="metric-top"><span>91-day Treasury bill</span><span class="source-chip"><i class="dot"></i>CBN fact</span></div>
+            <div class="metric-value">15.40%</div>
+            <div class="metric-foot"><span>28 Oct 2026</span><a class="text-link" href="https://www.cbn.gov.ng/IntOps/KeyRates.html" target="_blank" rel="noopener">Source ↗</a></div>
+          </article>
+        </div>
+        <div class="hero">
+          <div class="hero-main">
+            <div class="hero-meta"><span class="source-chip"><i class="dot"></i>Historical · CBN source</span><span class="event-ref">MPC MEETING 307 · 21–22 SEP 2026</span></div>
+            <h2>CBN resets the MPR to 23% and recalibrates the corridor</h2>
+            <p>The policy headline is striking. The nuance is more useful: the CBN described the move as an <strong>operational realignment</strong> to strengthen transmission and reinforce the MPR, and said it did not change the current policy stance.</p>
+            <p><a class="text-link" href="https://www.cbn.gov.ng/MonetaryPolicy/Decisions.html" target="_blank" rel="noopener">Read the CBN decision record ↗</a></p>
+          </div>
+          <div class="hero-side">
+            <div class="hero-side-title">Published MPR levels</div>
+            <div class="hero-compare" aria-label="MPR was 26.50 percent in July and was reset to 23 percent in September">
+              <div class="rate-block"><small>July 2026</small><strong>26.50%</strong></div>
+              <span class="rate-arrow" aria-hidden="true">→</span>
+              <div class="rate-block"><small>Sep 2026</small><strong>23.00%</strong></div>
+              <span class="rate-change">−350 bp*</span>
+            </div>
+            <div class="hero-caveat">*Arithmetic comparison of CBN-published levels. The CBN calls the September change a reset and says it is not a change in policy stance.</div>
+          </div>
+        </div>
+        <div class="legend" aria-label="Data labels">
+          <span class="legend-label">Reading key</span>
+          <span class="source-chip"><i class="dot"></i>Historical / source-backed</span>
+          <span class="ai-chip"><i class="dot"></i>AI-generated interpretation</span>
+          <span class="sim-chip"><i class="dot"></i>Illustrative scenario</span>
+          <span class="legend-copy">No simulated market prices or return forecasts in this demo.</span>
+        </div>
+        <div class="grid-two">
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2 class="panel-title">Event timeline</h2><div class="panel-sub">Official decision points and dated context</div></div>
+              <span class="source-chip"><i class="dot"></i>CBN record</span>
+            </div>
+            <div class="panel-body">
+              <div class="timeline">
+                <div class="timeline-event">
+                  <span class="timeline-mark"></span>
+                  <div><div class="timeline-date">20–21 Jul 2026 · MPC #306</div><div class="timeline-title">MPR held at 26.50%</div><div class="timeline-text">Corridor +50 / −450 bp; CRR settings retained.</div><a class="timeline-source" href="https://www.cbn.gov.ng/MonetaryPolicy/Decisions.html" target="_blank" rel="noopener">CBN decision record ↗</a></div>
+                </div>
+                <div class="timeline-event current">
+                  <span class="timeline-mark"></span>
+                  <div><div class="timeline-date">21–22 Sep 2026 · MPC #307</div><div class="timeline-title">MPR reset at 23.00%</div><div class="timeline-text">Corridor recalibrated to +50 / −300 bp. CRR unchanged.</div><a class="timeline-source" href="https://www.cbn.gov.ng/MonetaryPolicy/Decisions.html" target="_blank" rel="noopener">CBN decision record ↗</a></div>
+                </div>
+                <div class="timeline-event">
+                  <span class="timeline-mark"></span>
+                  <div><div class="timeline-date">Sep–Oct 2026 · dated indicators</div><div class="timeline-title">Post-event context, not proof of impact</div><div class="timeline-text">Inflation 14.63% in Sep · 91-day NTB 15.40% on 28 Oct · NFEM ₦1,346.26 on 30 Oct.</div><a class="timeline-source" href="https://www.cbn.gov.ng/IntOps/KeyRates.html" target="_blank" rel="noopener">CBN rates page ↗</a></div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="panel interpretation-panel">
+            <div class="panel-head">
+              <div><h2 class="panel-title">Orbit read-through</h2><div class="panel-sub">How the event becomes an investor question</div></div>
+              <span class="ai-chip"><i class="dot"></i>AI interpretation</span>
+            </div>
+            <div class="panel-body">
+              <p class="ai-lead">The <em>350 bp gap</em> is numerically large, but the CBN’s language changes the read: this was presented as a reset of the operating framework. The investor test is whether money-market pricing and credit conditions actually track the new anchor.</p>
+              <div class="chain-title">Illustrative transmission path · not a measured outcome</div>
+              <div class="chain" role="img" aria-label="Illustrative path from CBN policy corridor through interbank rates and Treasury bill pricing to deposit and credit rates">
+                <div class="chain-step"><span>01 · Policy</span>MPR &amp; corridor</div>
+                <div class="chain-step"><span>02 · Liquidity</span>Interbank rates</div>
+                <div class="chain-step"><span>03 · Pricing</span>Bill yields</div>
+                <div class="chain-step"><span>04 · Pass-through</span>Deposits &amp; credit</div>
+              </div>
+              <div class="qual-note"><span class="sim-chip">Illustrative</span><span>Qualitative pathway only. No assumed yield movement or investor return.</span></div>
+            </div>
+          </section>
+        </div>
+        <div class="section-head"><div><h3>Potential exposure map</h3><p>Qualitative sensitivities to monitor · direction is not predetermined</p></div><button class="btn small" data-view-target="sectors">Open sector monitor&nbsp; →</button></div>
+        <div class="sector-preview">
+          <article class="sector-mini"><div class="sector-mini-top"><span>Government securities</span><span class="sensitivity">High sensitivity</span></div><p>Watch bill auctions, secondary yields and liquidity. Policy is one input among supply and inflation expectations.</p></article>
+          <article class="sector-mini"><div class="sector-mini-top"><span>Deposit money banks</span><span class="sensitivity">Medium–high</span></div><p>CRR stayed unchanged; funding mix and deposit repricing can make bank outcomes differ.</p></article>
+          <article class="sector-mini"><div class="sector-mini-top"><span>Consumer &amp; SME credit</span><span class="sensitivity">Moderate</span></div><p>Any lending-rate pass-through may lag and depends on risk pricing and funding costs.</p></article>
+          <article class="sector-mini"><div class="sector-mini-top"><span>FX-sensitive sectors</span><span class="sensitivity">Monitor</span></div><p>Exchange-rate and imported-cost pressure can outweigh a policy-rate headline.</p></article>
+        </div>
+        <p class="data-note">CBN data pages may update on different schedules. Each displayed figure carries its own observation date. Values are historical snapshots, not live quotes.</p>
+      </section>
+
+      <section class="view" id="view-event" aria-label="Event intelligence" hidden>
+        <div class="legend">
+          <span class="legend-label">Evidence layers</span>
+          <span class="source-chip"><i class="dot"></i>CBN source fact</span>
+          <span class="ai-chip"><i class="dot"></i>Orbit interpretation</span>
+          <span class="sim-chip"><i class="dot"></i>Qualitative scenario</span>
+          <span class="legend-copy">Facts and analysis are kept separate throughout.</span>
+        </div>
+        <div class="event-layout">
+          <section class="panel">
+            <div class="panel-head"><div><h2 class="panel-title">The policy decision</h2><div class="panel-sub">CBN Monetary Policy Committee · 307th meeting · 21–22 September 2026</div></div><span class="source-chip"><i class="dot"></i>Source-backed</span></div>
+            <div class="panel-body">
+              <div class="fact-grid">
+                <div class="fact"><div class="fact-label">Monetary policy rate</div><div class="fact-value">Reset at 23.00%</div><div class="fact-context">Prior published level: 26.50% in July 2026</div></div>
+                <div class="fact"><div class="fact-label">Standing facilities corridor</div><div class="fact-value">+50 / −300 bp</div><div class="fact-context">Previously +50 / −450 bp in July</div></div>
+                <div class="fact"><div class="fact-label">Commercial-bank CRR</div><div class="fact-value">45.00%</div><div class="fact-context">Retained</div></div>
+                <div class="fact"><div class="fact-label">Merchant / non-TSA CRR</div><div class="fact-value">16.00% / 75.00%</div><div class="fact-context">Both retained</div></div>
+              </div>
+              <div class="statement-box"><strong>CBN framing:</strong> the rate reset and corridor recalibration were described as an operational realignment intended to strengthen policy transmission and reinforce the primacy of the MPR. The CBN said the recalibration did not constitute a change in the current policy stance.</div>
+              <p class="data-note">The 350 bp difference is arithmetic from published July and September MPR levels. “Reset” is the CBN’s term; this dashboard does not relabel the event as an easing cycle.</p>
+              <p><a class="text-link" href="https://www.cbn.gov.ng/MonetaryPolicy/Decisions.html" target="_blank" rel="noopener">CBN decision history ↗</a>&nbsp;&nbsp; <a class="text-link" href="https://www.cbn.gov.ng/Out/2026/CCD/Personal%20Statements%20of%20Members%20for%20the%20307th%20Meeting%20of%20the%20MPC_September%202026.pdf" target="_blank" rel="noopener">CBN MPC member statements ↗</a></p>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2 class="panel-title">AI explanation</h2><div class="panel-sub">Illustrative model output for this pitch demo</div></div><span class="ai-chip"><i class="dot"></i>AI-generated</span></div>
+            <div class="panel-body">
+              <div class="analysis-block"><div class="analysis-heading"><strong>What happened?</strong><span class="source-chip">CBN fact</span></div><p>The MPC reset the MPR to 23% and narrowed the lower side of the standing facilities corridor. Reserve requirements stayed at 45% for commercial banks, 16% for merchant banks and 75% for non-TSA public deposits.</p></div>
+              <div class="analysis-block"><div class="analysis-heading"><strong>Why?</strong><span class="source-chip">CBN framing</span></div><p>The CBN said the reset was intended to improve monetary-policy transmission and make the MPR the clearer operating anchor, supporting a move toward an inflation-targeting framework.</p></div>
+              <div class="analysis-block"><div class="analysis-heading"><strong>Why does it matter?</strong><span class="ai-chip">Interpretation</span></div><p>It changes the reference point for tracking short-term funding. The practical signal is not the headline alone; it is whether interbank rates, bill pricing, bank deposits and lending rates begin to align.</p></div>
+              <div class="analysis-block"><div class="analysis-heading"><strong>Key risks</strong><span class="ai-chip">Interpretation</span></div><p>Transmission may be slow or uneven. Inflation, FX liquidity, government borrowing and bank-specific funding conditions can dominate the direction of market pricing.</p></div>
+            </div>
+          </section>
+        </div>
+        <div class="section-head"><div><h3>What to watch next</h3><p>Conditional scenarios, not forecasts or probability-weighted outcomes</p></div><span class="sim-chip"><i class="dot"></i>Illustrative scenarios</span></div>
+        <div class="panel">
+          <div class="panel-body">
+            <div class="scenarios" role="group" aria-label="Choose a qualitative scenario">
+              <button class="scenario-btn" data-scenario="traction" aria-pressed="true"><strong>Transmission gains traction</strong><span>Rates align more closely</span></button>
+              <button class="scenario-btn" data-scenario="lag" aria-pressed="false"><strong>Pass-through stays uneven</strong><span>Funding frictions persist</span></button>
+              <button class="scenario-btn" data-scenario="pressure" aria-pressed="false"><strong>Inflation / FX pressure</strong><span>Policy space narrows</span></button>
+            </div>
+            <div class="scenario-output" id="scenarioOutput" aria-live="polite"><strong>Watch for confirming evidence</strong><p>If the corridor reset improves transmission, interbank pricing should trade more consistently within the new corridor and market rates may begin to respond. This is a conditional pathway, not a forecast. Check dated CBN rate observations before drawing a conclusion.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-sectors" aria-label="Sector impact monitor" hidden>
+        <div class="legend">
+          <span class="legend-label">Monitor labels</span>
+          <span class="ai-chip"><i class="dot"></i>AI interpretation</span>
+          <span class="sim-chip"><i class="dot"></i>Qualitative sensitivity</span>
+          <span class="legend-copy">Sensitivity is not an expected return or a buy / sell signal.</span>
+        </div>
+        <section class="panel">
+          <div class="panel-head"><div><h2 class="panel-title">Sector &amp; asset watchlist</h2><div class="panel-sub">Potential transmission channels from the CBN policy reset</div></div><span class="ai-chip"><i class="dot"></i>Illustrative analyst view</span></div>
+          <div class="panel-body">
+            <div class="sector-table-wrap">
+              <table class="sector-table">
+                <thead><tr><th>Sector / asset</th><th>Sensitivity</th><th>Possible channel to monitor</th><th>Useful indicator</th><th>Your watchlist</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="sector-name">Government securities<small>91-day bills · longer-duration debt</small></span></td><td><span class="tag-sensitivity">High</span></td><td>Short-rate repricing can affect bill pricing; longer-duration prices also respond to supply, liquidity and inflation expectations.</td><td>Bill auction results · secondary yields</td><td><button class="follow-btn" data-follow="Government securities">＋ Follow</button></td></tr>
+                  <tr><td><span class="sector-name">Deposit money banks<small>Funding · margins · loan books</small></span></td><td><span class="tag-sensitivity">Medium–high</span></td><td>Corridor and benchmark changes may alter funding costs; unchanged CRR and bank-specific deposit mix matter.</td><td>Interbank rate · deposit / lending rates</td><td><button class="follow-btn" data-follow="Deposit money banks">＋ Follow</button></td></tr>
+                  <tr><td><span class="sector-name">Consumer &amp; SME credit<small>Household and business borrowing</small></span></td><td><span class="tag-sensitivity">Moderate</span></td><td>Credit repricing can lag wholesale rates and depend on borrower risk, collateral and competition.</td><td>Prime lending rate · credit growth</td><td><button class="follow-btn" data-follow="Consumer & SME credit">＋ Follow</button></td></tr>
+                  <tr><td><span class="sector-name">FX-sensitive sectors<small>Importers · manufacturers · staples</small></span></td><td><span class="tag-sensitivity">Monitor</span></td><td>Currency and imported-input costs can outweigh the policy-rate signal or change inflation expectations.</td><td>NFEM · external reserves · inflation</td><td><button class="follow-btn" data-follow="FX-sensitive sectors">＋ Follow</button></td></tr>
+                  <tr><td><span class="sector-name">Cash &amp; short-duration portfolios<small>Deposits · money-market funds</small></span></td><td><span class="tag-sensitivity">High</span></td><td>Reinvestment terms and deposit offers may react sooner than borrower rates; terms vary by institution.</td><td>3-month deposit rate · 91-day NTB</td><td><button class="follow-btn" data-follow="Cash & short duration">＋ Follow</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="section-head"><div><h3>Watchlist signals</h3><p>Values shown are dated CBN observations, not live market quotes</p></div></div>
+            <div class="watch-summary" aria-label="Source-backed signals">
+              <span class="watch-pill"><b>Interbank call</b> 22.00% · 24 Sep</span>
+              <span class="watch-pill"><b>91-day NTB</b> 15.40% · 28 Oct</span>
+              <span class="watch-pill"><b>NFEM</b> ₦1,346.26 / US$ · 30 Oct</span>
+              <span class="watch-pill"><b>Inflation</b> 14.63% y/y · Sep</span>
+            </div>
+            <div class="brief-sources">
+              <a href="https://www.cbn.gov.ng/IntOps/KeyRates.html" target="_blank" rel="noopener">CBN Key Rates ↗</a>
+              <a href="https://www.cbn.gov.ng/rates/MacroIndicators.html" target="_blank" rel="noopener">CBN Macro Indicators ↗</a>
+              <a href="https://www.cbn.gov.ng/rates/exchratebycurrency.html" target="_blank" rel="noopener">CBN Exchange Rates ↗</a>
+            </div>
+          </div>
+        </section>
+        <div class="disclaimer"><strong>Interpretation boundary:</strong> these are transmission channels to investigate, not predicted winners or losers. ORBIT does not assign a future return, target price or probability to any sector.</div>
+      </section>
+
+      <section class="view" id="view-brief" aria-label="Sample investor brief" hidden>
+        <div class="panel">
+          <div class="panel-body">
+            <div class="brief-top">
+              <div><div class="eyebrow">Sample investor brief · Nigeria</div><div class="brief-title">MPC resets MPR to 23%: the operating framework changed; pass-through is the test</div><div class="brief-meta">ORBIT MARKET INTELLIGENCE · 04 NOV 2026 · EVENT DATE 22 SEP 2026</div></div>
+              <div class="brief-actions"><button class="btn small" id="copyBrief">Copy brief</button><button class="btn primary small" id="printBrief">Print / save PDF</button></div>
+            </div>
+            <div class="brief-body" id="briefText">
+              <p><strong>Signal.</strong> At its 307th meeting on 21–22 September 2026, the Central Bank of Nigeria reset the Monetary Policy Rate at 23.00% and recalibrated the standing facilities corridor to +50/−300 basis points. Cash reserve requirements stayed at 45% for deposit money banks, 16% for merchant banks and 75% for non-TSA public-sector deposits.</p>
+              <p><strong>Read-through.</strong> The new MPR is 350 bp below the July 2026 published level of 26.50%. The CBN describes the action as an operational realignment to strengthen transmission and restore the MPR’s primacy; it explicitly says the recalibration is not a change in policy stance. The headline rate difference should therefore not be treated on its own as proof of easier financial conditions.</p>
+              <h4>Investor lens</h4>
+              <ul class="brief-list">
+                <li>Track whether interbank rates trade consistently within the new corridor and whether bill pricing responds.</li>
+                <li>Compare deposit and lending-rate updates over time; bank funding mix and credit risk can produce uneven pass-through.</li>
+                <li>Keep inflation and FX conditions in view: the CBN reports September 2026 inflation at 14.63% year on year; its Key Rates page records NFEM at ₦1,346.26 per US dollar on 30 October.</li>
+                <li>Use the 91-day NTB observation of 15.40% on 28 October as market context, not evidence that the MPC reset caused a specific yield move.</li>
+              </ul>
+              <h4>Risks &amp; conditions</h4>
+              <p>Transmission may be delayed or uneven. Inflation persistence, FX liquidity, government borrowing requirements and bank-level funding costs could all shape market pricing. Future policy direction remains data-dependent; no outcome is assured.</p>
+              <div class="brief-callout">Investor takeaway: focus on confirmation in money-market rates, bill pricing and bank pass-through. This brief describes a monitoring framework; it is not a security recommendation or a return forecast.</div>
+              <p><strong>Data note.</strong> Values are source-backed historical observations with dates shown. Orbit’s causal read-through and scenario language are AI-generated illustrative interpretation for the prototype.</p>
+              <div class="brief-sources">
+                <a href="https://www.cbn.gov.ng/MonetaryPolicy/Decisions.html" target="_blank" rel="noopener">CBN MPC decisions ↗</a>
+                <a href="https://www.cbn.gov.ng/IntOps/KeyRates.html" target="_blank" rel="noopener">CBN Key Rates ↗</a>
+                <a href="https://www.cbn.gov.ng/rates/MacroIndicators.html" target="_blank" rel="noopener">CBN Macro Indicators ↗</a>
+                <a href="https://www.cbn.gov.ng/Out/2026/CCD/Personal%20Statements%20of%20Members%20for%20the%20307th%20Meeting%20of%20the%20MPC_September%202026.pdf" target="_blank" rel="noopener">CBN MPC member statements ↗</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <section class="panel" style="margin-top:14px">
+          <div class="panel-head"><div><h2 class="panel-title">Source register</h2><div class="panel-sub">Primary CBN sources used in this demonstration</div></div></div>
+          <div class="panel-body sources-grid">
+            <div class="source-item"><a href="https://www.cbn.gov.ng/MonetaryPolicy/Decisions.html" target="_blank" rel="noopener">MPC decisions ↗</a><p>September 2026 reset and July 2026 reference decision.</p></div>
+            <div class="source-item"><a href="https://www.cbn.gov.ng/Out/2026/CCD/Personal%20Statements%20of%20Members%20for%20the%20307th%20Meeting%20of%20the%20MPC_September%202026.pdf" target="_blank" rel="noopener">MPC member statements · September 2026 ↗</a><p>CBN explanation of the operating reset and policy-transmission rationale.</p></div>
+            <div class="source-item"><a href="https://www.cbn.gov.ng/IntOps/KeyRates.html" target="_blank" rel="noopener">Key Rates ↗</a><p>91-day Treasury bill and NFEM observations with dates.</p></div>
+            <div class="source-item"><a href="https://www.cbn.gov.ng/rates/MacroIndicators.html" target="_blank" rel="noopener">Macro Economic Indicators ↗</a><p>September inflation and September interbank call-rate context.</p></div>
+          </div>
+        </section>
+        <div class="disclaimer"><strong>Prototype / data-as-of disclaimer.</strong> ORBIT is a non-live demonstration. Market context is assembled from CBN pages observed on 04 Nov 2026; the displayed indicators have their own as-of dates. No live market feed, simulated price, guaranteed prediction or buy/sell recommendation is included. Interpretations and scenarios are illustrative, AI-generated and for discussion only.</div>
+      </section>
+    </main>
+  </div>
+  <div class="guide-backdrop" id="guideBackdrop" role="dialog" aria-modal="true" aria-labelledby="guideTitle" aria-describedby="guideCopy">
+    <div class="guide-modal">
+      <div class="guide-top"><span class="guide-kicker">ORBIT · guided partner demo</span><button class="close-guide" id="closeGuide" aria-label="Close guided demo">×</button></div>
+      <div class="guide-progress" aria-hidden="true"><span class="on"></span><span></span><span></span></div>
+      <h2 id="guideTitle">Start with one verified market event</h2>
+      <p id="guideCopy">Open the CBN’s September 2026 MPC decision. ORBIT keeps the published policy facts visible and separates them from the interpretation.</p>
+      <div class="guide-footer"><span class="guide-step" id="guideStep">Step 1 of 3</span><div><button class="btn small quiet" id="guideBack" hidden>Back</button><button class="btn primary small" id="guideNext">Trace the transmission&nbsp; →</button></div></div>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite">Copied</div>
+  <script>
+    (function () {
+      const navButtons = Array.from(document.querySelectorAll("[data-view-target]"));
+      const views = Array.from(document.querySelectorAll(".view"));
+      const titles = {
+        overview: ["From policy signal to investor context", "CBN MPC #307 · an evidence-led read of the September 2026 policy reset"],
+        event: ["One event, explained in context", "The CBN decision, its stated rationale and the questions investors can monitor"],
+        sectors: ["Map the channels before calling the winners", "Qualitative sector sensitivities · no return forecasts or trade recommendations"],
+        brief: ["A decision-ready investor brief", "A concise, source-linked summary to carry into a partner conversation"]
+      };
+      function openView(name) {
+        views.forEach(function (view) {
+          const isActive = view.id === "view-" + name;
+          view.classList.toggle("active", isActive);
+          view.hidden = !isActive;
+        });
+        document.querySelectorAll(".sidebar [data-view-target]").forEach(function (button) {
+          const isActive = button.dataset.viewTarget === name;
+          button.classList.toggle("active", isActive);
+          if (isActive) button.setAttribute("aria-current", "page");
+          else button.removeAttribute("aria-current");
+        });
+        document.getElementById("pageTitle").textContent = titles[name][0];
+        document.getElementById("pageSubtitle").textContent = titles[name][1];
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      navButtons.forEach(function (button) {
+        button.addEventListener("click", function () { openView(button.dataset.viewTarget); });
+      });
+
+      const scenarioContent = {
+        traction: {
+          title: "Watch for confirming evidence",
+          text: "If the corridor reset improves transmission, interbank pricing should trade more consistently within the new corridor and market rates may begin to respond. This is a conditional pathway, not a forecast. Check dated CBN rate observations before drawing a conclusion."
+        },
+        lag: {
+          title: "Separate the policy anchor from market pass-through",
+          text: "If liquidity conditions, deposit competition or risk premia dominate, bill and lending rates may move unevenly. Compare several dated observations and bank disclosures; do not infer a uniform sector outcome from the MPR alone."
+        },
+        pressure: {
+          title: "Stress-test the inflation and FX backdrop",
+          text: "If inflation or FX pressure returns, it could complicate transmission and narrow room for further policy realignment. Watch official inflation, NFEM and reserve data. This scenario is illustrative and assigns no probability."
+        }
+      };
+      document.querySelectorAll("[data-scenario]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          document.querySelectorAll("[data-scenario]").forEach(function (peer) { peer.setAttribute("aria-pressed", "false"); });
+          button.setAttribute("aria-pressed", "true");
+          const selected = scenarioContent[button.dataset.scenario];
+          document.querySelector("#scenarioOutput strong").textContent = selected.title;
+          document.querySelector("#scenarioOutput p").textContent = selected.text;
+        });
+      });
+
+      document.querySelectorAll("[data-follow]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          const following = button.classList.toggle("following");
+          button.textContent = following ? "✓ Following" : "＋ Follow";
+          button.setAttribute("aria-pressed", String(following));
+        });
+      });
+
+      const brief = document.getElementById("briefText");
+      const copyButton = document.getElementById("copyBrief");
+      const toast = document.getElementById("toast");
+      let toastTimer;
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2400);
+      }
+      copyButton.addEventListener("click", async function () {
+        const text = brief.innerText.trim();
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast("Investor brief copied");
+        } catch (error) {
+          const field = document.createElement("textarea");
+          field.value = text;
+          field.setAttribute("readonly", "");
+          field.style.position = "fixed";
+          field.style.opacity = "0";
+          document.body.appendChild(field);
+          field.select();
+          try { document.execCommand("copy"); showToast("Investor brief copied"); }
+          catch (copyError) { showToast("Copy is unavailable in this browser"); }
+          field.remove();
+        }
+      });
+      document.getElementById("printBrief").addEventListener("click", function () {
+        openView("brief");
+        window.setTimeout(function () { window.print(); }, 150);
+      });
+
+      const guideBackdrop = document.getElementById("guideBackdrop");
+      const guideTitle = document.getElementById("guideTitle");
+      const guideCopy = document.getElementById("guideCopy");
+      const guideStep = document.getElementById("guideStep");
+      const guideNext = document.getElementById("guideNext");
+      const guideBack = document.getElementById("guideBack");
+      const progress = Array.from(document.querySelectorAll(".guide-progress span"));
+      const guideSteps = [
+        {
+          view: "event",
+          title: "Start with one verified market event",
+          text: "Open the CBN’s September 2026 MPC decision. ORBIT keeps the published policy facts visible and separates them from the interpretation.",
+          next: "Trace the transmission"
+        },
+        {
+          view: "sectors",
+          title: "Translate the event into watchable channels",
+          text: "Move from the corridor reset to market indicators, sectors and assets that may be sensitive. Each sensitivity is qualitative; the prototype creates no price forecast.",
+          next: "See the investor brief"
+        },
+        {
+          view: "brief",
+          title: "Finish with a concise investor brief",
+          text: "The brief carries the CBN citations, explains the nuance and makes the next monitoring questions clear. It is ready to copy or print for a partner discussion.",
+          next: "Finish demo"
+        }
+      ];
+      let guideIndex = 0;
+      function renderGuide() {
+        const step = guideSteps[guideIndex];
+        openView(step.view);
+        guideTitle.textContent = step.title;
+        guideCopy.textContent = step.text;
+        guideStep.textContent = "Step " + (guideIndex + 1) + " of 3";
+        guideBack.hidden = guideIndex === 0;
+        guideNext.textContent = guideIndex === guideSteps.length - 1 ? "Finish demo" : step.next + "  →";
+        progress.forEach(function (bar, index) { bar.classList.toggle("on", index <= guideIndex); });
+      }
+      document.getElementById("startDemo").addEventListener("click", function () {
+        guideIndex = 0;
+        renderGuide();
+        guideBackdrop.classList.add("open");
+        document.getElementById("closeGuide").focus();
+      });
+      guideNext.addEventListener("click", function () {
+        if (guideIndex === guideSteps.length - 1) {
+          guideBackdrop.classList.remove("open");
+          showToast("Guided demo complete");
+          return;
+        }
+        guideIndex += 1;
+        renderGuide();
+      });
+      guideBack.addEventListener("click", function () { if (guideIndex > 0) { guideIndex -= 1; renderGuide(); } });
+      document.getElementById("closeGuide").addEventListener("click", function () { guideBackdrop.classList.remove("open"); });
+      guideBackdrop.addEventListener("click", function (event) { if (event.target === guideBackdrop) guideBackdrop.classList.remove("open"); });
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") guideBackdrop.classList.remove("open");
+      });
+    }());
+  </script>
+</body>
+</html>
